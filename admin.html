@@ -309,6 +309,23 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <input class="form-input" id="edit-name" type="text" placeholder="Ex: WS Cobrança">
       </div>
       <div class="form-group">
+        <label class="form-label">Total de Condomínios</label>
+        <input class="form-input" id="edit-condominios" type="number" min="0" value="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Conversão do Ajuizamento</label>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1">
+            <label class="form-label" style="font-size:11px">Aptos a ajuizar (180d, sem processo)</label>
+            <input class="form-input" id="edit-conv-inad" type="number" min="0" value="0">
+          </div>
+          <div style="flex:1">
+            <label class="form-label" style="font-size:11px">Já ajuizados</label>
+            <input class="form-input" id="edit-conv-ajuiz" type="number" min="0" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
         <label class="form-label">Processos e Valores por Estado</label>
         <table class="states-grid">
           <thead>
@@ -362,32 +379,33 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 // SENHA DE ACESSO — altere aqui:
 const ADMIN_PASS_HASH = '483e136fa3238bf54444723f277ce893f1cc60491f8bca7563dbf864aa183d92';
 
-const STATES = ['CE','BA','PR','MG','GO','MT','PE','PB','ES','MA','DF','MS','AL','PA','AM','SP'];
+const STATES = ['CE','BA','PR','MG','GO','MT','PE','PB','ES','MA','DF','MS','AL','PA','AM','SC','SP'];
 const STATE_NAMES = {
   CE:'Ceará', BA:'Bahia', PR:'Paraná', MG:'Minas Gerais', GO:'Goiás',
   MT:'Mato Grosso', PE:'Pernambuco', PB:'Paraíba', ES:'Espírito Santo',
   MA:'Maranhão', DF:'Distrito Federal', MS:'Mato Grosso do Sul',
-  AL:'Alagoas', PA:'Pará', AM:'Amazonas', SP:'São Paulo'
+  AL:'Alagoas', PA:'Pará', AM:'Amazonas', SC:'Santa Catarina', SP:'São Paulo'
 };
 
 /* ══════════════════════════════════════
    DEFAULT DATA
 ══════════════════════════════════════ */
 const DEFAULT_FIRMS = [
-  { id:'cerus',    name:'Cerus Negociação',  totalP:10000, totalV:50000000, states:{CE:{p:5000,v:30000000},BA:{p:3000,v:15000000},PR:{p:1000,v:2000000},PB:{p:500,v:1000000},AM:{p:500,v:2000000}} },
-  { id:'ws',       name:'WS Cobrança',       totalP:2000,  totalV:5000000,  states:{CE:{p:1000,v:2500000},GO:{p:500,v:1000000},PE:{p:40,v:750000},MS:{p:450,v:650000},SP:{p:10,v:100000}} },
-  { id:'pinheiro', name:'Pinheiro Brito',    totalP:1500,  totalV:5500000,  states:{BA:{p:1500,v:1500000}} },
-  { id:'mvb',      name:'MVB',               totalP:1000,  totalV:3500000,  states:{BA:{p:1000,v:1000000}} },
-  { id:'melo',     name:'Melo e Melo',       totalP:750,   totalV:2500000,  states:{GO:{p:500,v:1000000},MT:{p:200,v:1000000},MS:{p:50,v:500000}} },
-  { id:'penedo',   name:'Penedo Ltda',       totalP:450,   totalV:4000000,  states:{MG:{p:50,v:0},ES:{p:400,v:4000000}} },
-  { id:'donum',    name:'Donum Credit',      totalP:200,   totalV:2000000,  states:{CE:{p:100,v:1000000},BA:{p:100,v:1000000}} },
-  { id:'cm',       name:'CM Baiak',          totalP:200,   totalV:400000,   states:{PR:{p:200,v:400000}} },
-  { id:'bb',       name:'BB Adv',            totalP:150,   totalV:1500000,  states:{CE:{p:100,v:1000000},MA:{p:50,v:500000}} },
-  { id:'hef',      name:'HeF Consultoria',   totalP:15,    totalV:300000,   states:{PE:{p:15,v:300000}} },
-  { id:'rct',      name:'RCT',               totalP:10,    totalV:150000,   states:{DF:{p:10,v:150000}} },
-  { id:'mca',      name:'MCA',               totalP:5,     totalV:100000,   states:{GO:{p:5,v:100000}} },
-  { id:'burket',   name:'Burket & Ferreira', totalP:1,     totalV:10000,    states:{SP:{p:1,v:10000}} },
-  { id:'raiol',    name:'Raiol & Pimentel',  totalP:0,     totalV:0,        states:{PA:{p:0,v:0}} }
+  { id:'cerus',    name:'Cerus Negociação',  condominios:671, totalP:10000, totalV:50000000,   states:{CE:{p:5000,v:30000000},BA:{p:3000,v:15000000},PR:{p:1000,v:2000000},PB:{p:500,v:1000000},AM:{p:500,v:2000000}}, conv:{inad:13857,ajuiz:10341} },
+  { id:'ws',       name:'WS Cobrança',       condominios:201, totalP:465,   totalV:2280586.41, states:{CE:{p:239,v:1517783.29},GO:{p:219,v:745627.06},DF:{p:7,v:17176.06},SP:{p:0,v:100000}},                             conv:{inad:2544,ajuiz:465} },
+  { id:'pinheiro', name:'Pinheiro Brito',    condominios:52,  totalP:1799,  totalV:4504947,    states:{BA:{p:1799,v:4504947}},                                                                                             conv:{inad:2576,ajuiz:1799} },
+  { id:'mvb',      name:'MVB',               condominios:44,  totalP:366,   totalV:942549.9,   states:{BA:{p:366,v:942549.9}},                                                                                             conv:{inad:824,ajuiz:366} },
+  { id:'melo',     name:'Melo e Melo',       condominios:55,  totalP:730,   totalV:2573695.48, states:{GO:{p:215,v:644163.69},MT:{p:348,v:1444267.45},MS:{p:167,v:483579.74}},                                           conv:{inad:1852,ajuiz:730} },
+  { id:'penedo',   name:'Penedo Ltda',       condominios:74,  totalP:903,   totalV:2515479.26, states:{MG:{p:61,v:356507.17},ES:{p:842,v:2158972.09}},                                                                    conv:{inad:1819,ajuiz:903} },
+  { id:'donum',    name:'Donum Credit',      condominios:32,  totalP:167,   totalV:1974149.81, states:{CE:{p:85,v:1179160.59},BA:{p:82,v:794989.22}},                                                                     conv:{inad:676,ajuiz:137} },
+  { id:'cm',       name:'CM Baiak',          condominios:36,  totalP:85,    totalV:420735.87,  states:{PR:{p:83,v:396572.13},SC:{p:3,v:24163.74}},                                                                        conv:{inad:606,ajuiz:86} },
+  { id:'bb',       name:'BB Adv',            condominios:44,  totalP:113,   totalV:540914.14,  states:{CE:{p:47,v:390697.53},MA:{p:64,v:122974.17},AL:{p:2,v:27242.44}},                                                 conv:{inad:229,ajuiz:113} },
+  { id:'hef',      name:'HeF',               condominios:7,   totalP:12,    totalV:13447.6,    states:{PE:{p:12,v:13447.6}},                                                                                              conv:{inad:255,ajuiz:12} },
+  { id:'rct',      name:'RCT',               condominios:7,   totalP:10,    totalV:150000,     states:{DF:{p:10,v:150000}},                                                                                               conv:{inad:27,ajuiz:10} },
+  { id:'mca',      name:'MCA',               condominios:1,   totalP:5,     totalV:15000,      states:{GO:{p:5,v:15000}},                                                                                                 conv:{inad:23,ajuiz:1} },
+  { id:'burket',   name:'Burket & Ferreira', condominios:8,   totalP:1,     totalV:10000,       states:{SP:{p:1,v:10000}},                                                                                                conv:{inad:100,ajuiz:1} },
+  { id:'raiol',    name:'Raiol & Pimentel',  condominios:0,   totalP:0,     totalV:0,           states:{},                                                                                                                conv:{inad:0,ajuiz:0} },
+  { id:'aoc',      name:'AOC',               condominios:3,   totalP:22,    totalV:68296.37,    states:{MA:{p:22,v:68296.37}},                                                                                            conv:{inad:81,ajuiz:22} }
 ];
 
 /* ══════════════════════════════════════
@@ -548,6 +566,9 @@ function openEdit(id) {
   editingId = id;
   document.getElementById('modal-title').textContent = 'Editar Escritório';
   document.getElementById('edit-name').value = f.name;
+  document.getElementById('edit-condominios').value = f.condominios||0;
+  document.getElementById('edit-conv-inad').value = (f.conv&&f.conv.inad)||0;
+  document.getElementById('edit-conv-ajuiz').value = (f.conv&&f.conv.ajuiz)||0;
   buildStatesTable(f.states||{});
   document.getElementById('edit-modal').style.display = 'flex';
 }
@@ -556,6 +577,9 @@ function openAdd() {
   editingId = null;
   document.getElementById('modal-title').textContent = 'Novo Escritório';
   document.getElementById('edit-name').value = '';
+  document.getElementById('edit-condominios').value = 0;
+  document.getElementById('edit-conv-inad').value = 0;
+  document.getElementById('edit-conv-ajuiz').value = 0;
   buildStatesTable({});
   document.getElementById('edit-modal').style.display = 'flex';
   setTimeout(()=>document.getElementById('edit-name').focus(), 50);
@@ -569,6 +593,11 @@ function closeEdit() {
 function saveEdit() {
   const name = document.getElementById('edit-name').value.trim();
   if (!name) { alert('Informe o nome do escritório.'); return; }
+  const condominios = Number(document.getElementById('edit-condominios').value)||0;
+  const conv = {
+    inad: Number(document.getElementById('edit-conv-inad').value)||0,
+    ajuiz: Number(document.getElementById('edit-conv-ajuiz').value)||0
+  };
 
   const states = {};
   let totalP = 0, totalV = 0;
@@ -582,10 +611,10 @@ function saveEdit() {
   if (editingId) {
     const idx = firms.findIndex(x=>x.id===editingId);
     if (idx >= 0) {
-      firms[idx] = { ...firms[idx], name, totalP, totalV, states };
+      firms[idx] = { ...firms[idx], name, condominios, totalP, totalV, states, conv };
     }
   } else {
-    firms.push({ id: slug(name), name, totalP, totalV, states });
+    firms.push({ id: slug(name), name, condominios, totalP, totalV, states, conv });
   }
 
   save();
@@ -619,7 +648,7 @@ function handleImport(input) {
 
       // Find header row (contains "ESCRITÓRIO PARCEIRO" or similar)
       let headerIdx = -1;
-      for (let i = 0; i < Math.min(rows.length, 5); i++) {
+      for (let i = 0; i < Math.min(rows.length, 10); i++) {
         const r = rows[i];
         if (r.some(c => String(c).toUpperCase().includes('ESCRIT'))) {
           headerIdx = i; break;
@@ -630,16 +659,18 @@ function handleImport(input) {
         return;
       }
 
-      // State column order (as in spreadsheet): CE BA PR MG GO MT PE PB ES MA DF MS AL PA AM SP
-      const STATE_ORDER = ['CE','BA','PR','MG','GO','MT','PE','PB','ES','MA','DF','MS','AL','PA','AM','SP'];
-      // Columns 4..19 = processos, 20..35 = valores (0-indexed from col A)
-      const P_START = 4, V_START = 20;
+      // Layout: 0=nome 1=estados_atuam 2=condominios 3=totalP 4=totalV
+      // 5..21 = processos por estado (17 estados), 22..38 = valor por estado (17 estados)
+      const STATE_ORDER = ['CE','BA','PR','MG','GO','MT','PE','PB','ES','MA','DF','MS','AL','PA','AM','SC','SP'];
+      const P_START = 5, V_START = 22;
 
       const parsed = [];
-      for (let i = headerIdx+1; i < rows.length; i++) {
+      let i = headerIdx+1;
+      for (; i < rows.length; i++) {
         const row = rows[i];
         const name = String(row[0]||'').trim();
-        if (!name || !isNaN(Number(name)) || name.match(/^\d/)) continue; // skip total/empty rows
+        if (!name) continue;
+        if (name.toUpperCase() === 'TOTAL') { i++; break; } // fim da tabela principal
 
         const states = {};
         let totalP = 0, totalV = 0;
@@ -651,17 +682,39 @@ function handleImport(input) {
           totalV += v;
         });
 
-        // Use column C (index 2) for total processes if available
-        const colTotalP = Number(row[2])||0;
-        const colTotalV = Number(row[3])||0;
+        const condominios = Number(row[2])||0;
+        const colTotalP = Number(row[3])||0;
+        const colTotalV = Number(row[4])||0;
 
         parsed.push({
           id: slug(name),
           name,
+          condominios,
           totalP: colTotalP || totalP,
           totalV: colTotalV || totalV,
-          states
+          states,
+          conv: { inad: 0, ajuiz: 0 }
         });
+      }
+
+      // Procura a tabela de conversão (cabeçalho contém "INADIMPLENTES" ou "CONVERSÃO")
+      let convHeaderIdx = -1;
+      for (let j = i; j < rows.length; j++) {
+        const r = rows[j];
+        if (r.some(c => String(c).toUpperCase().includes('INADIMPLENTE') || String(c).toUpperCase().includes('CONVERS'))) {
+          convHeaderIdx = j; break;
+        }
+      }
+      if (convHeaderIdx >= 0) {
+        for (let j = convHeaderIdx+1; j < rows.length; j++) {
+          const row = rows[j];
+          const name = String(row[0]||'').trim();
+          if (!name || name.toUpperCase() === 'TOTAL') continue;
+          const inad = Number(row[1])||0;
+          const ajuiz = Number(row[2])||0;
+          const firm = parsed.find(f => f.name.trim().toLowerCase() === name.toLowerCase());
+          if (firm) firm.conv = { inad, ajuiz };
+        }
       }
 
       if (parsed.length === 0) {

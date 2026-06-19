@@ -143,7 +143,9 @@ header {
 .card-title-icon { font-size: 16px; }
 
 /* ── MAIN ROW ── */
-.main-row { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+.main-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: start; }
+@media (max-width: 1000px) { .main-row { grid-template-columns: 1fr; } }
+.conv-card .table-scroll { max-height: 580px; overflow-y: auto; }
 
 /* ── MAP ── */
 #map-wrap {
@@ -350,6 +352,24 @@ tr:hover td { background: var(--orange-light); }
       </div>
     </div>
 
+    <div class="card conv-card">
+      <div class="card-title"><span class="card-title-icon">📈</span> Ranking de Conversão do Ajuizamento</div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Escritório</th>
+              <th>Aptos a Ajuizar</th>
+              <th>Ajuizados</th>
+              <th style="min-width:130px">Conversão</th>
+            </tr>
+          </thead>
+          <tbody id="conv-body"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
   <!-- Gráficos -->
@@ -397,20 +417,21 @@ tr:hover td { background: var(--orange-light); }
    DEFAULT DATA
 ═══════════════════════════════════════ */
 const FIRMS_DEFAULT = [
-  { id:'cerus',    name:'Cerus Negociação',  condominios:657, totalP:10000, totalV:50000000, states:{CE:{p:5000,v:30000000},BA:{p:3000,v:15000000},PR:{p:1000,v:2000000},PB:{p:500,v:1000000},AM:{p:500,v:2000000}} },
-  { id:'ws',       name:'WS Cobrança',       condominios:201, totalP:2000,  totalV:5000000,  states:{CE:{p:1000,v:2500000},GO:{p:500,v:1000000},PE:{p:40,v:750000},MS:{p:450,v:650000},SP:{p:10,v:100000}} },
-  { id:'pinheiro', name:'Pinheiro Brito',    condominios:49,  totalP:1500,  totalV:5500000,  states:{BA:{p:1500,v:1500000}} },
-  { id:'mvb',      name:'MVB',               condominios:43,  totalP:1000,  totalV:3500000,  states:{BA:{p:1000,v:1000000}} },
-  { id:'melo',     name:'Melo e Melo',       condominios:55,  totalP:750,   totalV:2500000,  states:{GO:{p:500,v:1000000},MT:{p:200,v:1000000},MS:{p:50,v:500000}} },
-  { id:'penedo',   name:'Penedo Ltda',       condominios:70,  totalP:450,   totalV:4000000,  states:{MG:{p:50,v:0},ES:{p:400,v:4000000}} },
-  { id:'donum',    name:'Donum Credit',      condominios:32,  totalP:200,   totalV:2000000,  states:{CE:{p:100,v:1000000},BA:{p:100,v:1000000}} },
-  { id:'cm',       name:'CM Baiak',          condominios:34,  totalP:200,   totalV:400000,   states:{PR:{p:200,v:400000}} },
-  { id:'bb',       name:'BB Adv',            condominios:43,  totalP:150,   totalV:1500000,  states:{CE:{p:100,v:1000000},MA:{p:50,v:500000}} },
-  { id:'hef',      name:'HeF Consultoria',   condominios:7,   totalP:15,    totalV:300000,   states:{PE:{p:15,v:300000}} },
-  { id:'rct',      name:'RCT',               condominios:7,   totalP:10,    totalV:150000,   states:{DF:{p:10,v:150000}} },
-  { id:'mca',      name:'MCA',               condominios:1,   totalP:5,     totalV:100000,   states:{GO:{p:5,v:100000}} },
-  { id:'burket',   name:'Burket & Ferreira', condominios:1,   totalP:1,     totalV:10000,    states:{SP:{p:1,v:10000}} },
-  { id:'raiol',    name:'Raiol & Pimentel',  condominios:0,   totalP:0,     totalV:0,        states:{PA:{p:0,v:0}} }
+  { id:'cerus',    name:'Cerus Negociação',  condominios:671, totalP:10000, totalV:50000000,    states:{CE:{p:5000,v:30000000},BA:{p:3000,v:15000000},PR:{p:1000,v:2000000},PB:{p:500,v:1000000},AM:{p:500,v:2000000}}, conv:{inad:13857,ajuiz:10341,pct:0.74626542541675689} },
+  { id:'ws',       name:'WS Cobrança',       condominios:201, totalP:465,   totalV:2280586.41,  states:{CE:{p:239,v:1517783.29},GO:{p:219,v:745627.06},DF:{p:7,v:17176.06},SP:{p:0,v:100000}},                              conv:{inad:2544,ajuiz:465,pct:0.18278301886792453} },
+  { id:'pinheiro', name:'Pinheiro Brito',    condominios:52,  totalP:1799,  totalV:4504947,     states:{BA:{p:1799,v:4504947}},                                                                                              conv:{inad:2576,ajuiz:1799,pct:0.69836956521739135} },
+  { id:'mvb',      name:'MVB',               condominios:44,  totalP:366,   totalV:942549.9,    states:{BA:{p:366,v:942549.9}},                                                                                              conv:{inad:824,ajuiz:366,pct:0.44417475728155342} },
+  { id:'melo',     name:'Melo e Melo',       condominios:55,  totalP:730,   totalV:2573695.48,  states:{GO:{p:215,v:644163.69},MT:{p:348,v:1444267.45},MS:{p:167,v:483579.74}},                                            conv:{inad:1852,ajuiz:730,pct:0.39416846652267817} },
+  { id:'penedo',   name:'Penedo Ltda',       condominios:74,  totalP:903,   totalV:2515479.26,  states:{MG:{p:61,v:356507.17},ES:{p:842,v:2158972.09}},                                                                     conv:{inad:1819,ajuiz:903,pct:0.49642660802638811} },
+  { id:'donum',    name:'Donum Credit',      condominios:32,  totalP:167,   totalV:1974149.81,  states:{CE:{p:85,v:1179160.59},BA:{p:82,v:794989.22}},                                                                      conv:{inad:676,ajuiz:137,pct:0.20266272189349113} },
+  { id:'cm',       name:'CM Baiak',          condominios:36,  totalP:85,    totalV:420735.87,   states:{PR:{p:83,v:396572.13},SC:{p:3,v:24163.74}},                                                                         conv:{inad:606,ajuiz:86,pct:0.14191419141914191} },
+  { id:'bb',       name:'BB Adv',            condominios:44,  totalP:113,   totalV:540914.14,   states:{CE:{p:47,v:390697.53},MA:{p:64,v:122974.17},AL:{p:2,v:27242.44}},                                                  conv:{inad:229,ajuiz:113,pct:0.49344978165938863} },
+  { id:'hef',      name:'HeF',               condominios:7,   totalP:12,    totalV:13447.6,     states:{PE:{p:12,v:13447.6}},                                                                                               conv:{inad:255,ajuiz:12,pct:0.047058823529411764} },
+  { id:'rct',      name:'RCT',               condominios:7,   totalP:10,    totalV:150000,      states:{DF:{p:10,v:150000}},                                                                                                conv:{inad:27,ajuiz:10,pct:0.37037037037037035} },
+  { id:'mca',      name:'MCA',               condominios:1,   totalP:5,     totalV:15000,       states:{GO:{p:5,v:15000}},                                                                                                  conv:{inad:23,ajuiz:1,pct:0.043478260869565216} },
+  { id:'burket',   name:'Burket & Ferreira', condominios:8,   totalP:1,     totalV:10000,       states:{SP:{p:1,v:10000}},                                                                                                   conv:{inad:100,ajuiz:1,pct:0.01} },
+  { id:'raiol',    name:'Raiol & Pimentel',  condominios:0,   totalP:0,     totalV:0,           states:{},                                                                                                                   conv:{inad:0,ajuiz:0,pct:0} },
+  { id:'aoc',      name:'AOC',               condominios:3,   totalP:22,    totalV:68296.37,    states:{MA:{p:22,v:68296.37}},                                                                                              conv:{inad:81,ajuiz:22,pct:0.27160493827160492} }
 ];
 
 const UF_NAMES = {
@@ -567,6 +588,7 @@ function refresh() {
   updateMapColors();
   refreshCharts();
   renderRanking();
+  renderConversion();
 }
 
 function refreshCharts() {
@@ -817,6 +839,33 @@ function renderRanking() {
 }
 
 /* ═══════════════════════════════════════
+   RANKING DE CONVERSÃO
+═══════════════════════════════════════ */
+function renderConversion() {
+  const tbody = document.getElementById('conv-body');
+  if (!tbody) return;
+  const firms = getFilteredFirms().filter(f => f.conv && (f.conv.inad > 0 || f.conv.ajuiz > 0));
+  const withPct = firms.map(f => ({ f, pct: f.conv.inad > 0 ? (f.conv.ajuiz / f.conv.inad) : 0 }));
+  const sorted = withPct.sort((a,b) => b.pct - a.pct);
+  tbody.innerHTML = sorted.map(({f, pct: pctRatio}, i) => {
+    const pct = pctRatio * 100;
+    const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    return `
+      <tr>
+        <td><span class="rank ${rankClass}">#${i+1}</span></td>
+        <td style="font-weight:700">${f.name}</td>
+        <td style="color:var(--muted)">${fN(f.conv.inad)}</td>
+        <td style="font-weight:800;color:var(--orange)">${fN(f.conv.ajuiz)}</td>
+        <td>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="pct-label">${pct.toFixed(1)}%</div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════
    BOOT — carrega data.json ou usa padrão
 ═══════════════════════════════════════ */
 async function boot() {
@@ -845,6 +894,7 @@ async function boot() {
   initMap();
   initCharts();
   renderRanking();
+  renderConversion();
 }
 
 boot();
