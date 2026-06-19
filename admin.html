@@ -360,7 +360,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
    CONFIG
 ══════════════════════════════════════ */
 // SENHA DE ACESSO — altere aqui:
-const ADMIN_PASS = 'Cerus@2026';
+const ADMIN_PASS_HASH = '483e136fa3238bf54444723f277ce893f1cc60491f8bca7563dbf864aa183d92';
 
 const STATES = ['CE','BA','PR','MG','GO','MT','PE','PB','ES','MA','DF','MS','AL','PA','AM','SP'];
 const STATE_NAMES = {
@@ -400,9 +400,12 @@ let pendingImport = null;
 /* ══════════════════════════════════════
    AUTH
 ══════════════════════════════════════ */
-function checkPass() {
+async function checkPass() {
   const val = document.getElementById('pass-in').value;
-  if (val === ADMIN_PASS) {
+  const enc = new TextEncoder();
+  const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(val));
+  const hashHex = Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  if (hashHex === ADMIN_PASS_HASH) {
     sessionStorage.setItem('jm_auth', '1');
     document.getElementById('gate').style.display = 'none';
     document.getElementById('main').style.display = '';
