@@ -313,6 +313,20 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <input class="form-input" id="edit-condominios" type="number" min="0" value="0">
       </div>
       <div class="form-group">
+        <label class="form-label">Totais Gerais do Escritório</label>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1">
+            <label class="form-label" style="font-size:11px">Total de Processos</label>
+            <input class="form-input" id="edit-totalP" type="number" min="0" value="0">
+          </div>
+          <div style="flex:1">
+            <label class="form-label" style="font-size:11px">Valor Total Ajuizado (R$)</label>
+            <input class="form-input" id="edit-totalV" type="number" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <button type="button" class="btn btn-ghost" style="margin-top:6px;padding:5px 10px;font-size:11px" onclick="useStatesSum()">↺ Usar soma dos estados (<span id="states-sum-hint">0 proc. · R$ 0</span>)</button>
+      </div>
+      <div class="form-group">
         <label class="form-label">Conversão do Ajuizamento</label>
         <div style="display:flex;gap:10px">
           <div style="flex:1">
@@ -338,7 +352,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
           <tbody id="states-tbody"></tbody>
           <tfoot>
             <tr class="states-total-row">
-              <td style="padding:8px 10px;font-size:12px">TOTAL</td>
+              <td style="padding:8px 10px;font-size:12px">SOMA DOS ESTADOS</td>
               <td style="padding:8px 10px;text-align:right" id="modal-total-p">0</td>
               <td style="padding:8px 10px;text-align:right" id="modal-total-v">R$ 0</td>
             </tr>
@@ -550,14 +564,26 @@ function buildStatesTable(stateData) {
   recalcModal();
 }
 
-function recalcModal() {
+function statesSum() {
   let tp = 0, tv = 0;
   STATES.forEach(uf => {
     tp += Number(document.getElementById('p_'+uf)?.value)||0;
     tv += Number(document.getElementById('v_'+uf)?.value)||0;
   });
+  return {tp, tv};
+}
+
+function recalcModal() {
+  const {tp, tv} = statesSum();
   document.getElementById('modal-total-p').textContent = fN(tp);
   document.getElementById('modal-total-v').textContent = fV(tv);
+  document.getElementById('states-sum-hint').textContent = `${fN(tp)} proc. · ${fV(tv)}`;
+}
+
+function useStatesSum() {
+  const {tp, tv} = statesSum();
+  document.getElementById('edit-totalP').value = tp;
+  document.getElementById('edit-totalV').value = tv;
 }
 
 function openEdit(id) {
@@ -567,6 +593,8 @@ function openEdit(id) {
   document.getElementById('modal-title').textContent = 'Editar Escritório';
   document.getElementById('edit-name').value = f.name;
   document.getElementById('edit-condominios').value = f.condominios||0;
+  document.getElementById('edit-totalP').value = f.totalP||0;
+  document.getElementById('edit-totalV').value = f.totalV||0;
   document.getElementById('edit-conv-inad').value = (f.conv&&f.conv.inad)||0;
   document.getElementById('edit-conv-ajuiz').value = (f.conv&&f.conv.ajuiz)||0;
   buildStatesTable(f.states||{});
@@ -578,6 +606,8 @@ function openAdd() {
   document.getElementById('modal-title').textContent = 'Novo Escritório';
   document.getElementById('edit-name').value = '';
   document.getElementById('edit-condominios').value = 0;
+  document.getElementById('edit-totalP').value = 0;
+  document.getElementById('edit-totalV').value = 0;
   document.getElementById('edit-conv-inad').value = 0;
   document.getElementById('edit-conv-ajuiz').value = 0;
   buildStatesTable({});
@@ -594,18 +624,18 @@ function saveEdit() {
   const name = document.getElementById('edit-name').value.trim();
   if (!name) { alert('Informe o nome do escritório.'); return; }
   const condominios = Number(document.getElementById('edit-condominios').value)||0;
+  const totalP = Number(document.getElementById('edit-totalP').value)||0;
+  const totalV = Number(document.getElementById('edit-totalV').value)||0;
   const conv = {
     inad: Number(document.getElementById('edit-conv-inad').value)||0,
     ajuiz: Number(document.getElementById('edit-conv-ajuiz').value)||0
   };
 
   const states = {};
-  let totalP = 0, totalV = 0;
   STATES.forEach(uf => {
     const p = Number(document.getElementById('p_'+uf)?.value)||0;
     const v = Number(document.getElementById('v_'+uf)?.value)||0;
     if (p > 0 || v > 0) states[uf] = {p, v};
-    totalP += p; totalV += v;
   });
 
   if (editingId) {
